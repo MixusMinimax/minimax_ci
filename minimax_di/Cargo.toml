@@ -1,0 +1,9 @@
+[package]
+
+name = "minimax_di"
+version = "0.1.0"
+authors = ["Maxi <maxi@barmetler.com>"]
+
+[dependencies]
+
+[features]
