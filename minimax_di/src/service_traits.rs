@@ -1,15 +1,26 @@
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
-pub struct ServiceKey(String);
+use std::any::Any;
+use std::error::Error;
+use std::sync::Arc;
 
-pub trait ServiceCollection {
-    fn register_service<S>(&mut self, service_descriptor: S) -> &mut Self
-    where
-        S: ServiceDescriptor + 'static;
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
+pub struct ServiceKey(pub String);
+
+pub(crate) trait Service<Deps> {
+    fn new(deps: Deps) -> Result<Box<Self>, Box<dyn Error>>;
 }
 
-pub trait ServiceProvider {}
+pub trait ServiceCollection {
+    fn register_service(
+        &mut self,
+        service_descriptor: Box<dyn ServiceDescriptor>,
+    ) -> &mut dyn ServiceCollection;
 
-pub trait Service {}
+    fn get_services(&self, service_key: &ServiceKey) -> Vec<&Box<dyn ServiceDescriptor>>;
+}
+
+pub trait ServiceProvider {
+    fn get_service(&self, key: &ServiceKey) -> Option<Box<dyn Any>>;
+}
 
 pub enum ServiceLifetime {
     Singleton,
@@ -18,7 +29,7 @@ pub enum ServiceLifetime {
 }
 
 /// For every service, a service descriptor is created that implements this trait.
-pub trait ServiceDescriptor: Service {
+pub trait ServiceDescriptor {
     /// Gets the lifetime of this service.
     fn lifetime(&self) -> ServiceLifetime;
 
@@ -29,5 +40,5 @@ pub trait ServiceDescriptor: Service {
     fn dependencies(&self) -> Vec<ServiceKey>;
 
     /// Constructs a new instance of the service based on the dependencies.
-    fn new_service(&self, service_provider: &dyn ServiceProvider) -> Box<dyn Service>;
+    fn new_service(&self, service_provider: &dyn ServiceProvider) -> Box<dyn Any>;
 }
