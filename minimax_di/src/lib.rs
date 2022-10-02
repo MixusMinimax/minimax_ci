@@ -1,6 +1,7 @@
 use service_collection::ServiceCollectionImpl;
-use service_traits::{ServiceCollection, ServiceProviderBuilder};
+use service_traits::ServiceCollection;
 
+pub mod errors;
 pub mod service_collection;
 pub mod service_provider;
 pub mod service_traits;

@@ -1,9 +1,13 @@
 use std::any::Any;
+use std::error::Error;
 
 use lazy_static::lazy_static;
 
-use minimax_di::service_traits::{GenericServiceProvider, ServiceDescriptor, ServiceKey, ServiceLifetime, ServiceProvider, ServiceProviderBuilder};
 use minimax_di::service_traits::ServiceLifetime::Transient;
+use minimax_di::service_traits::{
+    GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime,
+    ServiceProvider, ServiceProviderBuilder,
+};
 
 pub trait ExampleService {
     fn say_hello(&self);
@@ -36,8 +40,19 @@ impl ServiceDescriptor for ExampleServiceDescriptor {
         Vec::new()
     }
 
-    fn new_service(&self, service_provider: &dyn ServiceProvider) -> Box<dyn Any> {
-        Box::new(Box::new(ExampleServiceImpl {}) as Box<dyn ExampleService>)
+    fn new_service(
+        &self,
+        _service_provider: &dyn ServiceProvider,
+    ) -> Result<Box<dyn Any>, Box<dyn Error>> {
+        Ok(Box::new(
+            ExampleServiceImpl::new(())? as Box<dyn ExampleService>
+        ))
+    }
+}
+
+impl Service<(), dyn ExampleService> for ExampleServiceImpl {
+    fn new(_deps: ()) -> Result<Box<Self>, Box<dyn Error>> {
+        Ok(Box::new(ExampleServiceImpl {}))
     }
 }
 
@@ -51,6 +66,5 @@ fn main() {
     let example_service: Box<dyn ExampleService> = service_provider
         .get_service::<dyn ExampleService>(&EXAMPLE_IDENTIFIER)
         .unwrap();
-
     example_service.say_hello();
 }

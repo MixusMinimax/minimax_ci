@@ -1,11 +1,11 @@
 use std::any::Any;
 use std::error::Error;
-use std::sync::Arc;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct ServiceKey(pub String);
 
-pub(crate) trait Service<Deps> {
+pub trait Service<Deps, Interface: ?Sized> {
     fn new(deps: Deps) -> Result<Box<Self>, Box<dyn Error>>;
 }
 
@@ -15,18 +15,21 @@ pub trait ServiceCollection {
         service_descriptor: Box<dyn ServiceDescriptor>,
     ) -> &mut dyn ServiceCollection;
 
+    #[must_use]
     fn get_services(&self, service_key: &ServiceKey) -> Vec<&dyn ServiceDescriptor>;
 }
 
 pub trait ServiceProvider {
-    fn get_service_any(&self, key: &ServiceKey) -> Option<Box<dyn Any>>;
+    #[must_use]
+    fn get_service_any(&self, key: &ServiceKey) -> Result<Box<dyn Any>, Box<dyn Error>>;
 }
 
 pub trait GenericServiceProvider {
-    fn get_service<S: ?Sized + 'static>(&self, key: &ServiceKey) -> Option<Box<S>>;
+    fn get_service<S: ?Sized + 'static>(&self, key: &ServiceKey) -> Result<Box<S>, Box<dyn Error>>;
 }
 
 pub trait ServiceProviderBuilder {
+    #[must_use]
     fn build(self) -> Box<dyn ServiceProvider>;
 }
 
@@ -39,14 +42,30 @@ pub enum ServiceLifetime {
 /// For every service, a service descriptor is created that implements this trait.
 pub trait ServiceDescriptor {
     /// Gets the lifetime of this service.
+    #[must_use]
     fn lifetime(&self) -> ServiceLifetime;
 
     /// Gets the key of this service.
+    #[must_use]
     fn identifier(&self) -> ServiceKey;
 
     /// Gets the dependency keys of this service.
+    #[must_use]
     fn dependencies(&self) -> Vec<ServiceKey>;
 
     /// Constructs a new instance of the service based on the dependencies.
-    fn new_service(&self, service_provider: &dyn ServiceProvider) -> Box<dyn Any>;
+    /// Because of the limitations of rust, this returns a Box of a Box to the actual service trait.
+    fn new_service(
+        &self,
+        service_provider: &dyn ServiceProvider,
+    ) -> Result<Box<dyn Any>, Box<dyn Error>>;
+}
+
+// Display
+
+impl Display for ServiceKey {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.as_str())?;
+        Ok(())
+    }
 }
