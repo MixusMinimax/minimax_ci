@@ -1,5 +1,5 @@
 use service_collection::ServiceCollectionImpl;
-use service_traits::ServiceCollection;
+use service_traits::{ServiceCollection, ServiceProviderBuilder};
 
 pub mod service_collection;
 pub mod service_provider;

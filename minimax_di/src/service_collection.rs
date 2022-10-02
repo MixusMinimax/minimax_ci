@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::sync::Arc;
 
 use service_traits::{ServiceCollection, ServiceDescriptor, ServiceKey};
 
@@ -30,10 +29,10 @@ impl ServiceCollection for ServiceCollectionImpl {
         self
     }
 
-    fn get_services(&self, service_key: &ServiceKey) -> Vec<&Box<dyn ServiceDescriptor>> {
+    fn get_services(&self, service_key: &ServiceKey) -> Vec<&dyn ServiceDescriptor> {
         match self.service_descriptors.get(service_key) {
             None => Vec::new(),
-            Some(descriptors) => descriptors.iter().collect(),
+            Some(descriptors) => descriptors.iter().map(Box::as_ref).collect(),
         }
     }
 }

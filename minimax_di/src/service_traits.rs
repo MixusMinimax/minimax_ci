@@ -15,11 +15,19 @@ pub trait ServiceCollection {
         service_descriptor: Box<dyn ServiceDescriptor>,
     ) -> &mut dyn ServiceCollection;
 
-    fn get_services(&self, service_key: &ServiceKey) -> Vec<&Box<dyn ServiceDescriptor>>;
+    fn get_services(&self, service_key: &ServiceKey) -> Vec<&dyn ServiceDescriptor>;
 }
 
 pub trait ServiceProvider {
-    fn get_service(&self, key: &ServiceKey) -> Option<Box<dyn Any>>;
+    fn get_service_any(&self, key: &ServiceKey) -> Option<Box<dyn Any>>;
+}
+
+pub trait GenericServiceProvider {
+    fn get_service<S: ?Sized + 'static>(&self, key: &ServiceKey) -> Option<Box<S>>;
+}
+
+pub trait ServiceProviderBuilder {
+    fn build(self) -> Box<dyn ServiceProvider>;
 }
 
 pub enum ServiceLifetime {

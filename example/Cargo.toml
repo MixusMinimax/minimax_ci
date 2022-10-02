@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 minimax_di = { path = "../minimax_di" }
+lazy_static = "1.4.0"
