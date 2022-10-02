@@ -1,6 +1,7 @@
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct ServiceKey(pub String);
@@ -20,17 +21,21 @@ pub trait ServiceCollection {
 }
 
 pub trait ServiceProvider {
-    #[must_use]
-    fn get_service_any(&self, key: &ServiceKey) -> Result<Box<dyn Any>, Box<dyn Error>>;
+    fn get_service_any(
+        &self,
+        key: &ServiceKey,
+    ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>>;
 }
 
 pub trait GenericServiceProvider {
-    fn get_service<S: ?Sized + 'static>(&self, key: &ServiceKey) -> Result<Box<S>, Box<dyn Error>>;
+    fn get_service<S: ?Sized + Sync + Send + 'static>(
+        &self,
+        key: &ServiceKey,
+    ) -> Result<Arc<Box<S>>, Box<dyn Error>>;
 }
 
 pub trait ServiceProviderBuilder {
-    #[must_use]
-    fn build(self) -> Box<dyn ServiceProvider>;
+    fn build(self) -> Result<Box<dyn ServiceProvider>, Box<dyn Error>>;
 }
 
 pub enum ServiceLifetime {
@@ -53,12 +58,16 @@ pub trait ServiceDescriptor {
     #[must_use]
     fn dependencies(&self) -> Vec<ServiceKey>;
 
+    /// Type of the service implementation
+    #[must_use]
+    fn service_type(&self) -> TypeId;
+
     /// Constructs a new instance of the service based on the dependencies.
     /// Because of the limitations of rust, this returns a Box of a Box to the actual service trait.
     fn new_service(
         &self,
         service_provider: &dyn ServiceProvider,
-    ) -> Result<Box<dyn Any>, Box<dyn Error>>;
+    ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>>;
 }
 
 // Display

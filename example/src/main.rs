@@ -1,13 +1,14 @@
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::error::Error;
+use std::sync::Arc;
 
 use lazy_static::lazy_static;
 
-use minimax_di::service_traits::ServiceLifetime::Transient;
 use minimax_di::service_traits::{
     GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime,
     ServiceProvider, ServiceProviderBuilder,
 };
+use minimax_di::service_traits::ServiceLifetime::Transient;
 
 pub trait ExampleService {
     fn say_hello(&self);
@@ -40,13 +41,15 @@ impl ServiceDescriptor for ExampleServiceDescriptor {
         Vec::new()
     }
 
+    fn service_type(&self) -> TypeId {
+        TypeId::of::<ExampleServiceImpl>()
+    }
+
     fn new_service(
         &self,
         _service_provider: &dyn ServiceProvider,
-    ) -> Result<Box<dyn Any>, Box<dyn Error>> {
-        Ok(Box::new(
-            ExampleServiceImpl::new(())? as Box<dyn ExampleService>
-        ))
+    ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>> {
+        Ok(Arc::new(ExampleServiceImpl::new(())? as Box<dyn ExampleService + Send + Sync>))
     }
 }
 
@@ -61,10 +64,10 @@ fn main() {
 
     services.register_service(Box::new(ExampleServiceDescriptor));
 
-    let service_provider = services.build();
+    let service_provider = services.build().unwrap();
 
-    let example_service: Box<dyn ExampleService> = service_provider
-        .get_service::<dyn ExampleService>(&EXAMPLE_IDENTIFIER)
+    let example_service: Arc<Box<dyn ExampleService + Send + Sync>> = service_provider
+        .get_service::<dyn ExampleService + Send + Sync>(&EXAMPLE_IDENTIFIER)
         .unwrap();
     example_service.say_hello();
 }
