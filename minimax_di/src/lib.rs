@@ -5,6 +5,7 @@ pub mod errors;
 pub mod service_collection;
 pub mod service_provider;
 pub mod service_traits;
+pub mod macros;
 
 pub fn new_service_collection() -> Box<dyn ServiceCollection> {
     Box::new(ServiceCollectionImpl::new())

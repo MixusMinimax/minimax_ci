@@ -4,17 +4,16 @@ use std::sync::Arc;
 
 use lazy_static::lazy_static;
 
+use minimax_di::minimax_service;
 use minimax_di::service_traits::{
     GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime,
     ServiceProvider, ServiceProviderBuilder,
 };
-use minimax_di::service_traits::ServiceLifetime::{Singleton, Transient};
+use minimax_di::service_traits::ServiceLifetime::Singleton;
 
 pub trait ExampleService {
     fn say_hello(&self);
 }
-
-pub struct ExampleServiceDescriptor;
 
 lazy_static! {
     pub static ref EXAMPLE_IDENTIFIER: ServiceKey = ServiceKey(String::from("ExampleService"));
@@ -22,45 +21,33 @@ lazy_static! {
 
 pub struct ExampleServiceImpl {}
 
+
 impl ExampleService for ExampleServiceImpl {
     fn say_hello(&self) {
         println!("Hello, World!");
     }
 }
 
-impl ServiceDescriptor for ExampleServiceDescriptor {
-    fn lifetime(&self) -> ServiceLifetime {
-        Singleton
-    }
+minimax_service! {
+    type interface = dyn ExampleService;
+    type descriptor = ExampleServiceDescriptor;
+    let lifetime = Singleton;
 
-    fn identifier(&self) -> ServiceKey {
-        ServiceKey("ExampleService".to_string())
-    }
-
-    fn dependencies(&self) -> Vec<ServiceKey> {
-        Vec::new()
-    }
-
-    fn service_type(&self) -> TypeId {
-        TypeId::of::<ExampleServiceImpl>()
-    }
-
-    fn new_service(
-        &self,
-        _service_provider: &dyn ServiceProvider,
-    ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>> {
-        Ok(Arc::new(
-            ExampleServiceImpl::new(())? as Box<dyn ExampleService + Send + Sync>
-        ))
-    }
-}
-
-impl Service<(), dyn ExampleService> for ExampleServiceImpl {
-    fn new(deps: ()) -> Result<Box<Self>, Box<dyn Error>> {
-        println!("ExampleServiceImpl::new({deps:?})");
+    fn new((): ()) -> Result<Box<ExampleServiceImpl>, Box<dyn Error>> {
+        println!("ExampleServiceImpl::new(())");
         Ok(Box::new(ExampleServiceImpl {}))
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 fn main() {
     let mut services = minimax_di::new_service_collection();
