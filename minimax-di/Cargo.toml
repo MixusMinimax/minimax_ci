@@ -1,6 +1,6 @@
 [package]
 
-name = "minimax_di"
+name = "minimax-di"
 version = "0.1.0"
 authors = ["Maxi <maxi@barmetler.com>"]
 

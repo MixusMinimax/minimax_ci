@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-minimax_di = { path = "../minimax_di" }
+minimax-di = { path = "../minimax-di" }
 lazy_static = "1.4.0"
