@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "minimax-proc",
     "minimax-di",
     "example"
 ]

@@ -5,6 +5,9 @@
       <sourceFolder url="file://$MODULE_DIR$/example/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/minimax-di/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/minimax-macros/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/minimax-proc/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/minimax-proc/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/minimax-di/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

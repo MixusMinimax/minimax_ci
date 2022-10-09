@@ -1,18 +1,13 @@
 #[macro_export]
-macro_rules! stringify_dependencies {
-    ($($deps:ty), +) => {};
-}
-
-#[macro_export]
 macro_rules! minimax_service {
     {
-        type interface = dyn $interface:ident$(<$($interface_args:ty), +>)?;
+        type interface = $interface:ty;
         type descriptor = $descriptor:ident;
         let lifetime = $lifetime:expr;
 
         fn new(($($args:ident), *): $($deps:ty), +) -> Result<Box<$imp:ty>, Box<dyn Error>> $bl:block
     } => {
-        impl Service<$($deps), *, dyn $interface$(<$($interface_args), +>)?> for $imp {
+        impl Service<$($deps), *, $interface> for $imp {
             fn new(($($args:ident), *) : $($deps), +) -> Result<Box<$imp>, Box<dyn Error>> $bl
         }
 
@@ -24,7 +19,7 @@ macro_rules! minimax_service {
             }
 
             fn identifier(&self) -> ServiceKey {
-                ServiceKey(stringify!($interface$(<$($interface_args), +>)?).to_string())
+                ServiceKey(stringify_service_ref!($interface).to_string())
             }
 
             fn dependencies(&self) -> Vec<ServiceKey> {
@@ -40,7 +35,7 @@ macro_rules! minimax_service {
                 _service_provider: &dyn ServiceProvider,
             ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>> {
                 Ok(Arc::new(
-                    <$imp>::new(())? as Box<dyn $interface$(<$($interface_args), +>)? + Sync + Send>
+                    <$imp>::new(())? as Box<add_traits![$interface, core::marker::Send, core::marker::Sync, 'static]>
                 ))
             }
         }
