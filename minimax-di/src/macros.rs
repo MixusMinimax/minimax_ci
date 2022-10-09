@@ -1,8 +1,6 @@
 #[macro_export]
 macro_rules! stringify_dependencies {
-    ($($deps:ty), +) => {
-
-    }
+    ($($deps:ty), +) => {};
 }
 
 #[macro_export]
@@ -22,7 +20,7 @@ macro_rules! minimax_service {
 
         impl ServiceDescriptor for $descriptor {
             fn lifetime(&self) -> ServiceLifetime {
-                Singleton
+                $lifetime
             }
 
             fn identifier(&self) -> ServiceKey {

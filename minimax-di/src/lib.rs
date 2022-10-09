@@ -1,3 +1,5 @@
+extern crate lazy_static;
+
 use service_collection::ServiceCollectionImpl;
 use service_traits::ServiceCollection;
 

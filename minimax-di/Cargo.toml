@@ -1,9 +1,11 @@
 [package]
-
 name = "minimax-di"
 version = "0.1.0"
 authors = ["Maxi <maxi@barmetler.com>"]
 
-[dependencies]
+[lib]
 
-[features]
+[dependencies]
+regex = "1.6"
+lazy_static = "1.4"
+syn = "1.0"

@@ -5,11 +5,11 @@ use std::sync::Arc;
 use lazy_static::lazy_static;
 
 use minimax_di::minimax_service;
+use minimax_di::service_traits::ServiceLifetime::Singleton;
 use minimax_di::service_traits::{
     GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime,
     ServiceProvider, ServiceProviderBuilder,
 };
-use minimax_di::service_traits::ServiceLifetime::Singleton;
 
 pub trait ExampleService {
     fn say_hello(&self);
@@ -20,7 +20,6 @@ lazy_static! {
 }
 
 pub struct ExampleServiceImpl {}
-
 
 impl ExampleService for ExampleServiceImpl {
     fn say_hello(&self) {
@@ -38,16 +37,6 @@ minimax_service! {
         Ok(Box::new(ExampleServiceImpl {}))
     }
 }
-
-
-
-
-
-
-
-
-
-
 
 fn main() {
     let mut services = minimax_di::new_service_collection();
