@@ -4,20 +4,18 @@ use std::sync::Arc;
 
 use lazy_static::lazy_static;
 
-use minimax_di::minimax_service;
 use minimax_di::service_traits::{
     GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime,
     ServiceProvider, ServiceProviderBuilder,
 };
 use minimax_di::service_traits::ServiceLifetime::Singleton;
-use minimax_proc::{add_traits, stringify_service_ref};
 
 pub trait ExampleService {
     fn say_hello(&self);
 }
 
 lazy_static! {
-    pub static ref EXAMPLE_IDENTIFIER: ServiceKey = ServiceKey(String::from("dyn ExampleService"));
+    pub static ref EXAMPLE_IDENTIFIER: ServiceKey = ServiceKey(String::from("ExampleService"));
 }
 
 pub struct ExampleServiceImpl {}
@@ -28,16 +26,57 @@ impl ExampleService for ExampleServiceImpl {
     }
 }
 
-minimax_service! {
-    type interface = dyn ExampleService;
-    type descriptor = ExampleServiceDescriptor;
-    let lifetime = Singleton;
+// minimax_service! {
+//     type interface = dyn ExampleService;
+//     type descriptor = ExampleServiceDescriptor;
+//     let lifetime = Singleton;
+//
+//     fn new((): ()) -> Result<Box<ExampleServiceImpl>, Box<dyn Error>> {
+//         println!("ExampleServiceImpl::new(())");
+//         Ok(Box::new(ExampleServiceImpl {}))
+//     }
+// }
 
-    fn new((): ()) -> Result<Box<ExampleServiceImpl>, Box<dyn Error>> {
+// That macro will generate the following code:
+// --start--
+
+struct ExampleServiceDescriptor;
+
+impl Service<(), dyn ExampleService> for ExampleServiceImpl {
+    fn new((): ()) -> Result<Box<Self>, Box<dyn Error>> {
         println!("ExampleServiceImpl::new(())");
         Ok(Box::new(ExampleServiceImpl {}))
     }
 }
+
+impl ServiceDescriptor for ExampleServiceDescriptor {
+    fn lifetime(&self) -> ServiceLifetime {
+        Singleton
+    }
+
+    fn identifier(&self) -> ServiceKey {
+        EXAMPLE_IDENTIFIER.to_owned()
+    }
+
+    fn dependencies(&self) -> Vec<ServiceKey> {
+        vec![]
+    }
+
+    fn service_type(&self) -> TypeId {
+        TypeId::of::<ExampleServiceImpl>()
+    }
+
+    fn new_service(
+        &self,
+        _service_provider: &dyn ServiceProvider,
+    ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>> {
+        Ok(Arc::new(
+            ExampleServiceImpl::new(())? as Box<dyn ExampleService + Send + Sync>
+        ))
+    }
+}
+
+// --end--
 
 fn main() {
     let mut services = minimax_di::new_service_collection();
