@@ -1,4 +1,4 @@
-use minimax_proc::add_traits;
+use barm_proc::add_traits;
 
 #[test]
 fn test_add_traits() {
@@ -7,11 +7,11 @@ fn test_add_traits() {
     assert_eq!(x.to_string(), "1");
 
     trait Asd<T> {
-        fn asd(t: T) -> T;
+        fn asd(&self, t: T) -> T;
     }
     struct AsdImpl;
     impl Asd<i32> for AsdImpl {
-        fn asd(t: i32) -> i32 {
+        fn asd(&self, t: i32) -> i32 {
             t
         }
     }

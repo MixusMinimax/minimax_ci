@@ -2,6 +2,7 @@
 name = "barm-di"
 version = "0.0.1"
 authors = ["Maxi <maxi@barmetler.com>"]
+edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [lib]
