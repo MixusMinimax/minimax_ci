@@ -1,14 +1,15 @@
 [package]
-name = "barm-di"
+name = "mixus-di"
 version = "0.0.1"
 authors = ["Maxi <maxi@barmetler.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
+repository = ""
 
 [lib]
 
 [dependencies]
-barm-proc = { path = "../barm-proc", version = "0.0.1" }
+mixus-proc = { path = "../mixus-proc", version = "0.0.1" }
 regex = "1.6"
 lazy_static = "1.4"
 syn = "1.0"
