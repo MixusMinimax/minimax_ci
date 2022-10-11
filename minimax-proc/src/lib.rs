@@ -1,13 +1,17 @@
-#![feature(proc_macro_quote)]
+use proc_macro::TokenStream;
 
-use proc_macro::{quote, TokenStream};
-
-use syn::{Expr, GenericArgument, Ident, ItemFn, LitStr, parse_macro_input, Path, Stmt, TraitBound, Type, TypeParamBound, TypeParen, TypePath, TypeTraitObject};
+use quote::quote;
+use syn::{
+    Expr, GenericArgument, Ident, Item, ItemFn, ItemType, LitStr, Local, parse_macro_input, Pat,
+    Path, PatIdent, Stmt, TraitBound, Type, TypeParamBound, TypeParen, TypePath, TypeTraitObject,
+};
 use syn::__private::{Span, ToTokens};
 use syn::parse::{Parse, ParseStream};
 use syn::PathArguments::AngleBracketed;
 use syn::spanned::Spanned;
 use syn::token::{Add, Comma};
+
+use crate::ServiceDefinitionItemType::{Constructor, Descriptor, Interface, Lifetime};
 
 struct TraitDefinition {
     ty: TypeTraitObject,
@@ -113,12 +117,58 @@ struct ServiceDefinition {
     constructor: ItemFn,
 }
 
+enum ServiceDefinitionItemType {
+    Interface(Type),
+    Descriptor(Ident),
+    Lifetime(Expr),
+    Constructor(ItemFn),
+}
+
+fn service_definition_parse_item(item: Stmt) -> syn::Result<ServiceDefinitionItemType> {
+    Ok(match item {
+        Stmt::Item(Item::Type(ItemType { ident, ty, .. }))
+            if ident.to_string() == "interface".to_string() =>
+        {
+            Interface(*ty)
+        }
+        Stmt::Item(Item::Type(ItemType { ident, ty, .. }))
+            if ident.to_string() == "descriptor".to_string() =>
+        {
+            Descriptor(match *ty {
+                Type::Path(TypePath {
+                    path: Path { segments, .. },
+                    ..
+                }) if segments.len() == 1 => {
+                    segments.into_iter().last().expect("Can't happen").ident
+                }
+                ty => {
+                    return Err(syn::Error::new(
+                        ty.span(),
+                        "Invalid Descriptor, expected Ident",
+                    ))
+                }
+            })
+        }
+        Stmt::Local(Local {
+            pat: Pat::Ident(PatIdent { ident, .. }),
+            init: Some((_, init)),
+            ..
+        }) if ident.to_string() == "lifetime".to_string() => Lifetime(*init),
+        Stmt::Item(Item::Fn(constructor))
+            if constructor.sig.ident.to_string() == "new".to_string() =>
+        {
+            Constructor(constructor)
+        }
+        item => return Err(syn::Error::new(item.span(), "Unrecognized Item")),
+    })
+}
+
 impl Parse for ServiceDefinition {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let interface = None;
-        let descriptor = None;
-        let lifetime = None;
-        let constructor = None;
+        let mut interface = None;
+        let mut descriptor = None;
+        let mut lifetime = None;
+        let mut constructor = None;
 
         while !matches!(
             (&interface, &descriptor, &lifetime, &constructor),
@@ -126,6 +176,34 @@ impl Parse for ServiceDefinition {
         ) {
             // Todo: parse statement as one of the four parameters
             let item: Stmt = input.parse()?;
+            let item_span = item.span();
+            let converted = service_definition_parse_item(item)?;
+            match converted {
+                Interface(v) => {
+                    if interface.is_some() {
+                        return Err(syn::Error::new(item_span, "Interface defined twice"));
+                    }
+                    let _ = interface.insert(v);
+                }
+                Descriptor(v) => {
+                    if descriptor.is_some() {
+                        return Err(syn::Error::new(item_span, "Descriptor defined twice"));
+                    }
+                    let _ = descriptor.insert(v);
+                }
+                Lifetime(v) => {
+                    if lifetime.is_some() {
+                        return Err(syn::Error::new(item_span, "Lifetime defined twice"));
+                    }
+                    let _ = lifetime.insert(v);
+                }
+                Constructor(v) => {
+                    if constructor.is_some() {
+                        return Err(syn::Error::new(item_span, "Constructor defined twice"));
+                    }
+                    let _ = constructor.insert(v);
+                }
+            }
         }
 
         Ok(ServiceDefinition {
@@ -140,7 +218,20 @@ impl Parse for ServiceDefinition {
 #[proc_macro]
 pub fn minimax_service(input: TokenStream) -> TokenStream {
     let service_def = parse_macro_input!(input as ServiceDefinition);
-    quote! {
-        type Asd = i32;
-    }.into()
+    let descriptor_ident = service_def.descriptor;
+    let lifetime = service_def.lifetime;
+    return quote! {
+        pub struct #descriptor_ident;
+
+        impl minimax_di::service_traits::ServiceDescriptor for #descriptor_ident {
+            fn lifetime(&self) -> minimax_di::service_traits::ServiceLifetime {
+                #lifetime
+            }
+        }
+
+        pub struct Asd {
+            pub value: i32,
+        }
+    }
+    .into();
 }

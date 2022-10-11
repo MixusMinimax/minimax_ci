@@ -5,7 +5,7 @@ use std::sync::Arc;
 use lazy_static::lazy_static;
 
 use minimax_di::service_traits::{
-    GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime,
+    GenericServiceProvider, Service, ServiceKey, ServiceLifetime,
     ServiceProvider, ServiceProviderBuilder,
 };
 use minimax_di::service_traits::ServiceLifetime::Singleton;
@@ -49,7 +49,7 @@ impl Service<(), dyn ExampleService> for ExampleServiceImpl {
     }
 }
 
-impl ServiceDescriptor for ExampleServiceDescriptor {
+impl minimax_di::service_traits::ServiceDescriptor for ExampleServiceDescriptor {
     fn lifetime(&self) -> ServiceLifetime {
         Singleton
     }
