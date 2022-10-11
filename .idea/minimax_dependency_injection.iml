@@ -4,10 +4,10 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/example/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/minimax-macros/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/barm-di/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/barm-di/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/barm-proc/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/barm-proc/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/mixus-di/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mixus-di/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/mixus-proc/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mixus-proc/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

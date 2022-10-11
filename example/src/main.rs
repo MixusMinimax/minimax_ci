@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use lazy_static::lazy_static;
 
-use barm_di::service_traits::{GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime, ServiceProvider, ServiceProviderBuilder};
-use barm_di::service_traits::ServiceLifetime::Singleton;
+use mixus_di::service_traits::{GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime, ServiceProvider, ServiceProviderBuilder};
+use mixus_di::service_traits::ServiceLifetime::Singleton;
 
 pub trait ExampleService {
     fn say_hello(&self);
@@ -76,7 +76,7 @@ impl ServiceDescriptor for ExampleServiceDescriptor {
 // --end--
 
 fn main() {
-    let mut services = barm_di::new_service_collection();
+    let mut services = mixus_di::new_service_collection();
 
     println!("{}", ExampleServiceDescriptor.identifier());
 

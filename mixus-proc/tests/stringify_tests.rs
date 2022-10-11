@@ -1,4 +1,4 @@
-use barm_proc::stringify_service_ref;
+use mixus_proc::stringify_service_ref;
 
 macro_rules! asd {
     ($($interface:tt)+) => {stringify_service_ref![$($interface)+]};

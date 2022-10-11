@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::sync::{Arc, RwLock};
 
-use errors::ServiceNotFoundError;
-use service_traits::{
+use crate::errors::ServiceNotFoundError;
+use crate::service_traits::{
     GenericServiceProvider, ServiceCollection, ServiceKey, ServiceProvider, ServiceProviderBuilder,
 };
-use service_traits::ServiceLifetime::Singleton;
+use crate::service_traits::ServiceLifetime::Singleton;
 
 pub struct ServiceProviderImpl {
     services: Box<dyn ServiceCollection>,

@@ -1,5 +1,5 @@
 [package]
-name = "barm-proc"
+name = "mixus-proc"
 version = "0.0.1"
 authors = ["Maxi <maxi@barmetler.com>"]
 edition = "2021"

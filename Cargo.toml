@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-    "barm-proc",
-    "barm-di",
+    "mixus-proc",
+    "mixus-di",
     "example"
 ]

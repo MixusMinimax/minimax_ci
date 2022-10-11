@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
-use service_traits::ServiceKey;
+use crate::service_traits::ServiceKey;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ServiceNotFoundError(pub ServiceKey);

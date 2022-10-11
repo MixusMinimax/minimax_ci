@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use service_traits::{ServiceCollection, ServiceDescriptor, ServiceKey};
+use crate::service_traits::{ServiceCollection, ServiceDescriptor, ServiceKey};
 
 pub(crate) struct ServiceCollectionImpl {
     service_descriptors: HashMap<ServiceKey, Vec<Box<dyn ServiceDescriptor>>>,

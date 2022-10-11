@@ -1,4 +1,4 @@
-use barm_proc::add_traits;
+use mixus_proc::add_traits;
 
 #[test]
 fn test_add_traits() {
