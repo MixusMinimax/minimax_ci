@@ -4,6 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-minimax-di = { path = "../minimax-di" }
-minimax-proc = { path = "../minimax-proc" }
+barm-di = { path = "../barm-di" }
 lazy_static = "1.4.0"

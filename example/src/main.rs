@@ -4,11 +4,8 @@ use std::sync::Arc;
 
 use lazy_static::lazy_static;
 
-use minimax_di::service_traits::{
-    GenericServiceProvider, Service, ServiceKey, ServiceLifetime,
-    ServiceProvider, ServiceProviderBuilder,
-};
-use minimax_di::service_traits::ServiceLifetime::Singleton;
+use barm_di::service_traits::{GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime, ServiceProvider, ServiceProviderBuilder};
+use barm_di::service_traits::ServiceLifetime::Singleton;
 
 pub trait ExampleService {
     fn say_hello(&self);
@@ -49,7 +46,7 @@ impl Service<(), dyn ExampleService> for ExampleServiceImpl {
     }
 }
 
-impl minimax_di::service_traits::ServiceDescriptor for ExampleServiceDescriptor {
+impl ServiceDescriptor for ExampleServiceDescriptor {
     fn lifetime(&self) -> ServiceLifetime {
         Singleton
     }
@@ -79,7 +76,7 @@ impl minimax_di::service_traits::ServiceDescriptor for ExampleServiceDescriptor 
 // --end--
 
 fn main() {
-    let mut services = minimax_di::new_service_collection();
+    let mut services = barm_di::new_service_collection();
 
     println!("{}", ExampleServiceDescriptor.identifier());
 

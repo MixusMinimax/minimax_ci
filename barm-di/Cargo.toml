@@ -1,0 +1,13 @@
+[package]
+name = "barm-di"
+version = "0.0.1"
+authors = ["Maxi <maxi@barmetler.com>"]
+license = "MIT OR Apache-2.0"
+
+[lib]
+
+[dependencies]
+barm-proc = { path = "../barm-proc", version = "0.0.1" }
+regex = "1.6"
+lazy_static = "1.4"
+syn = "1.0"
