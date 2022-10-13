@@ -1,4 +1,4 @@
-extern crate lazy_static;
+#![feature(allocator_api)]
 
 use service_collection::ServiceCollectionImpl;
 use service_traits::ServiceCollection;

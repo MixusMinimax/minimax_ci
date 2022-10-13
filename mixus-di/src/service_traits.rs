@@ -6,8 +6,31 @@ use std::sync::Arc;
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct ServiceKey(pub String);
 
-pub trait Service<Deps, Interface: ?Sized> {
-    fn new(deps: Deps) -> Result<Box<Self>, Box<dyn Error>>;
+pub trait AnyArc: Any {
+    fn clone_arc(&self) -> Box<dyn AnyArc>;
+}
+
+impl dyn AnyArc {
+    pub fn is<T: Any>(&self) -> bool {
+        // Get `TypeId` of the type this function is instantiated with.
+        let t = TypeId::of::<T>();
+
+        // Get `TypeId` of the type in the trait object (`self`).
+        let concrete = self.type_id();
+
+        // Compare both `TypeId`s on equality.
+        t == concrete
+    }
+}
+
+impl<T: ?Sized + 'static> AnyArc for Arc<T> {
+    fn clone_arc(&self) -> Box<dyn AnyArc> {
+        Box::new(self.clone())
+    }
+}
+
+pub trait Service<Deps, Interface: ?Sized>: Sized {
+    fn new(deps: Deps) -> Result<Self, Box<dyn Error>>;
 }
 
 pub trait ServiceCollection {
@@ -24,14 +47,14 @@ pub trait ServiceProvider {
     fn get_service_any(
         &self,
         key: &ServiceKey,
-    ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>>;
+    ) -> Result<Box<dyn AnyArc>, Box<dyn Error>>;
 }
 
 pub trait GenericServiceProvider {
     fn get_service<S: ?Sized + Sync + Send + 'static>(
         &self,
         key: &ServiceKey,
-    ) -> Result<Arc<Box<S>>, Box<dyn Error>>;
+    ) -> Result<Arc<S>, Box<dyn Error>>;
 }
 
 pub trait ServiceProviderBuilder {
@@ -67,7 +90,7 @@ pub trait ServiceDescriptor {
     fn new_service(
         &self,
         service_provider: &dyn ServiceProvider,
-    ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>>;
+    ) -> Result<Box<dyn AnyArc>, Box<dyn Error>>;
 }
 
 // Display

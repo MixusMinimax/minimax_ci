@@ -1,10 +1,13 @@
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use std::error::Error;
 use std::sync::Arc;
 
 use lazy_static::lazy_static;
 
-use mixus_di::service_traits::{GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime, ServiceProvider, ServiceProviderBuilder};
+use mixus_di::service_traits::{
+    AnyArc, GenericServiceProvider, Service, ServiceDescriptor, ServiceKey, ServiceLifetime,
+    ServiceProvider, ServiceProviderBuilder,
+};
 use mixus_di::service_traits::ServiceLifetime::Singleton;
 
 pub trait ExampleService {
@@ -40,9 +43,9 @@ impl ExampleService for ExampleServiceImpl {
 struct ExampleServiceDescriptor;
 
 impl Service<(), dyn ExampleService> for ExampleServiceImpl {
-    fn new((): ()) -> Result<Box<Self>, Box<dyn Error>> {
+    fn new((): ()) -> Result<Self, Box<dyn Error>> {
         println!("ExampleServiceImpl::new(())");
-        Ok(Box::new(ExampleServiceImpl {}))
+        Ok(ExampleServiceImpl {})
     }
 }
 
@@ -66,9 +69,9 @@ impl ServiceDescriptor for ExampleServiceDescriptor {
     fn new_service(
         &self,
         _service_provider: &dyn ServiceProvider,
-    ) -> Result<Arc<dyn Any + Send + Sync>, Box<dyn Error>> {
-        Ok(Arc::new(
-            ExampleServiceImpl::new(())? as Box<dyn ExampleService + Send + Sync>
+    ) -> Result<Box<dyn AnyArc>, Box<dyn Error>> {
+        Ok(Box::new(
+            Arc::new(ExampleServiceImpl::new(())?) as Arc<dyn ExampleService + Send + Sync>
         ))
     }
 }
@@ -84,14 +87,14 @@ fn main() {
 
     let service_provider = services.build().unwrap();
 
-    let example_service: Arc<Box<dyn ExampleService + Send + Sync>> = service_provider
+    let example_service: Arc<dyn ExampleService + Send + Sync> = service_provider
         .get_service::<dyn ExampleService + Send + Sync>(&EXAMPLE_IDENTIFIER)
         .unwrap();
     example_service.say_hello();
 
     // If singleton, then the constructor will not be called again here:
 
-    let example_service: Arc<Box<dyn ExampleService + Send + Sync>> = service_provider
+    let example_service: Arc<dyn ExampleService + Send + Sync> = service_provider
         .get_service::<dyn ExampleService + Send + Sync>(&EXAMPLE_IDENTIFIER)
         .unwrap();
     example_service.say_hello();
